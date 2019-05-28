@@ -4,7 +4,7 @@ Quantum computation simulator
 
 ## Qubit
 
-A qubit represents a quantum bit which is the basic unit of computation.
+A [qubit](https://en.wikipedia.org/wiki/Qubit) represents a quantum bit which is the basic unit of computation.
 
 It can be created initially with a 0 or 1 state.
 
