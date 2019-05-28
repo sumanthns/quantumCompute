@@ -1,0 +1,38 @@
+{
+  "name": "quantumCompute",
+  "version": "1.0.0",
+  "description": "Quantum computation simulator",
+  "main": "index.js",
+  "author": "Sumanth Nagadavalli Suresh",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint --ext ts src"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.13",
+    "eslint": "^5.16.0",
+    "jest": "^24.8.0",
+    "tslint": "^5.16.0",
+    "typescript": "^3.4.5",
+    "webpack": "^4.32.2",
+    "webpack-cli": "^3.3.2"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "ts-jest"
+    },
+    "testMatch": [
+      "**/src/**/__tests__/**/*.test.ts"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "testEnvironment": "node"
+  },
+  "dependencies": {
+    "ts-jest": "^24.0.2"
+  }
+}
