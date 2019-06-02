@@ -1,9 +1,15 @@
+import { isEqual } from 'lodash';
 import BaseGate from './gates/baseGate';
-import lookUp from './gates/blochCircle';
+import lookUpOnBlochCircle from './gates/blochCircle';
+import { validateCnotOperation } from './validation';
+import Not from './gates/not';
 
 export default class Qubit {
   private internalState: number[];
   private valueHistory: number[] = [];
+  private entagledQubit?: Qubit;
+  private superImposed: boolean = false;
+  private measured: boolean = false;
   constructor(type: number) {
     if (type === 0) {
       this.internalState = [1, 0];
@@ -18,15 +24,68 @@ export default class Qubit {
 
   public apply(gate: BaseGate) {
     const gateType = gate.getType();
-    this.internalState = lookUp(this.internalState, gateType);
+    if (gateType === '50H') {
+      this.superImposed = !this.superImposed;
+    }
+    this.internalState = lookUpOnBlochCircle(this.internalState, gateType);
     return this;
   }
 
-  public show() {
+  public cnot(anotherQubit: Qubit) {
+    validateCnotOperation(this, anotherQubit);
+    if (!anotherQubit.isSuperimposed()) {
+      const controlValue = anotherQubit.measure();
+      if (controlValue === 1) {
+        this.invertState();
+      }
+    } else {
+      const controlState = this.entangle(anotherQubit);
+      if (
+        isEqual(controlState, [0, 1]) ||
+        isEqual(controlState, [Math.sqrt(0.5), -Math.sqrt(0.5)])
+      ) {
+        this.invertState();
+      }
+    }
+    return this;
+  }
+
+  public isEntangled(anotherQubit: Qubit) {
+    return this.entagledQubit === anotherQubit;
+  }
+
+  public establishMutualEntanglement(anotherQubit: Qubit) {
+    if (
+      this.canEntangle() &&
+      anotherQubit.isEntangled(this) &&
+      typeof this.entagledQubit === 'undefined'
+    ) {
+      this.entagledQubit = anotherQubit;
+      return this.internalState;
+    }
+  }
+
+  public canEntangle() {
+    return (
+      typeof this.entagledQubit === 'undefined' && this.superImposed === true
+    );
+  }
+
+  public isSuperimposed() {
+    return this.superImposed;
+  }
+
+  public isMeasured() {
+    return this.measured;
+  }
+
+  public measure() {
+    let finalValue;
+    this.measured = true;
     if (this.internalState[0] === 1) {
-      return 0;
+      finalValue = 0;
     } else if (this.internalState[0] === 0) {
-      return 1;
+      finalValue = 1;
     } else {
       const zeroProbability = Math.pow(this.internalState[0], 2);
       let value;
@@ -39,7 +98,23 @@ export default class Qubit {
           numberOfZeroes / this.valueHistory.length <= zeroProbability ? 0 : 1;
       }
       this.valueHistory.push(value);
-      return value;
+      finalValue = value;
     }
+    if (
+      typeof this.entagledQubit !== 'undefined' &&
+      !this.entagledQubit.isMeasured()
+    ) {
+      this.entagledQubit.measure();
+    }
+    return finalValue;
+  }
+
+  private entangle(anotherQubit: Qubit) {
+    this.entagledQubit = anotherQubit;
+    return anotherQubit.establishMutualEntanglement(this);
+  }
+
+  private invertState() {
+    this.apply(new Not());
   }
 }

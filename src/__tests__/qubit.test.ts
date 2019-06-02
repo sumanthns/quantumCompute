@@ -1,5 +1,6 @@
 import Qubit from '../qubit';
 import Hadamard from '../gates/hadamard';
+import Not from '../gates/not';
 
 describe('qubit', () => {
   describe('create', () => {
@@ -29,7 +30,7 @@ describe('qubit', () => {
       let count = 0;
       const results = [];
       while (count < 10) {
-        results.push(qubit.show());
+        results.push(qubit.measure());
         count += 1;
       }
       const zeroes = results.filter(r => r === 0);
@@ -49,7 +50,7 @@ describe('qubit', () => {
         let count = 0;
         const results = [];
         while (count < 10) {
-          results.push(qubit.show());
+          results.push(qubit.measure());
           count += 1;
         }
         const zeroes = results.filter(r => r === 0);
@@ -64,5 +65,129 @@ describe('qubit', () => {
         }
       })
     );
+  });
+
+  describe('not', () => {
+    it('should negate the current state of absolute qubit', () => {
+      const notGate = new Not();
+      expect(new Qubit(0).apply(notGate).measure()).toEqual(1);
+      expect(new Qubit(1).apply(notGate).measure()).toEqual(0);
+    });
+
+    it('should negate the current state of superimposed qubit started with 0', () => {
+      const notGate = new Not();
+      const qubit = new Qubit(0);
+      const hadamard = new Hadamard();
+      qubit
+        .apply(hadamard)
+        .apply(notGate)
+        .apply(hadamard);
+      const results = [];
+      let count = 0;
+      while (count < 10) {
+        results.push(qubit.measure());
+        count++;
+      }
+
+      const zeroes = results.filter(r => r === 0);
+      const ones = results.filter(r => r === 1);
+      expect(zeroes.length).toEqual(0);
+      expect(ones.length).toEqual(10);
+    });
+
+    it('should negate the current state of superimposed qubit started with 1', () => {
+      const notGate = new Not();
+      const qubit = new Qubit(1);
+      const hadamard = new Hadamard();
+      qubit
+        .apply(hadamard)
+        .apply(notGate)
+        .apply(hadamard);
+      const results = [];
+      let count = 0;
+      while (count < 10) {
+        results.push(qubit.measure());
+        count++;
+      }
+
+      const zeroes = results.filter(r => r === 0);
+      const ones = results.filter(r => r === 1);
+      expect(zeroes.length).toEqual(10);
+      expect(ones.length).toEqual(0);
+    });
+  });
+
+  describe.only('cnot', () => {
+    it('should invalidate cnot between a superimposed qubit and an absolute qubit', () => {
+      const aQubit = new Qubit(0);
+      const bQubit = new Qubit(1).apply(new Hadamard());
+      expect(() => bQubit.cnot(aQubit)).toThrow(
+        'Cnot operation can only be performed between two superimposed qubits or two absolute qubits.'
+      );
+    });
+
+    it('should invalidate cnot between of a qubit on itself', () => {
+      const aQubit = new Qubit(0);
+      expect(() => aQubit.cnot(aQubit)).toThrow(
+        'Cnot operation can only be performed on two different qubits.'
+      );
+    });
+
+    it('should invalidate cnot between a superimposed qubit and already entagled qubit', () => {
+      const aQubit = new Qubit(0).apply(new Hadamard());
+      const alreadyEntangledQubit = new Qubit(0)
+        .apply(new Hadamard())
+        .cnot(new Qubit(1).apply(new Hadamard()));
+
+      expect(() => aQubit.cnot(alreadyEntangledQubit)).toThrow(
+        'Could not entangle given qubits. Entanglement is essential in performing cnot of a superimposed qubit.'
+      );
+    });
+
+    it('should not invert a qubit when control qubit is 0 for absolute qubits', () => {
+      expect(new Qubit(0).cnot(new Qubit(0)).measure()).toBe(0);
+      expect(new Qubit(1).cnot(new Qubit(0)).measure()).toBe(1);
+    });
+
+    it('should invert a qubit when control qubit is 1 for absolute qubits', () => {
+      expect(new Qubit(0).cnot(new Qubit(1)).measure()).toBe(1);
+      expect(new Qubit(1).cnot(new Qubit(1)).measure()).toBe(0);
+    });
+
+    it('should not invert a qubit when control qubit is 0 for superimposed qubits', () => {
+      const aSuperImposedQubit = new Qubit(0).apply(new Hadamard());
+      const bSuperImposedQubit = new Qubit(0).apply(new Hadamard());
+
+      const results = [];
+      aSuperImposedQubit.cnot(bSuperImposedQubit).apply(new Hadamard());
+      let counter = 0;
+      while (counter < 10) {
+        results.push(aSuperImposedQubit.measure());
+        counter++;
+      }
+
+      const zeroes = results.filter(r => r === 0);
+      const ones = results.filter(r => r === 1);
+      expect(zeroes.length).toEqual(10);
+      expect(ones.length).toEqual(0);
+    });
+
+    it('should invert a qubit when control qubit is 1 for superimposed qubits', () => {
+      const aSuperImposedQubit = new Qubit(0).apply(new Hadamard());
+      const bSuperImposedQubit = new Qubit(1).apply(new Hadamard());
+
+      const results = [];
+      aSuperImposedQubit.cnot(bSuperImposedQubit).apply(new Hadamard());
+      let counter = 0;
+      while (counter < 10) {
+        results.push(aSuperImposedQubit.measure());
+        counter++;
+      }
+
+      const zeroes = results.filter(r => r === 0);
+      const ones = results.filter(r => r === 1);
+      expect(zeroes.length).toEqual(0);
+      expect(ones.length).toEqual(10);
+    });
   });
 });

@@ -35,8 +35,8 @@ const BlockCircle = [
         nextState: [0, 1]
       },
       {
-        type: 'not',
-        nextState: [-Math.sqrt(0.5), Math.sqrt(0.5)]
+        type: 'NOT',
+        nextState: [Math.sqrt(0.5), Math.sqrt(0.5)]
       }
     ]
   },
@@ -48,14 +48,14 @@ const BlockCircle = [
         nextState: [1, 0]
       },
       {
-        type: 'not',
-        nextState: [Math.sqrt(0.5), Math.sqrt(0.5)]
+        type: 'NOT',
+        nextState: [Math.sqrt(0.5), -Math.sqrt(0.5)]
       }
     ]
   }
 ];
 
-const lookUp = (currentState: number[], actionType: string) => {
+const lookUpOnBlochCircle = (currentState: number[], actionType: string) => {
   const blochEntry = BlockCircle.find(entry =>
     isEqual(entry.state, currentState)
   );
@@ -71,4 +71,4 @@ const lookUp = (currentState: number[], actionType: string) => {
   return action.nextState;
 };
 
-export default lookUp;
+export default lookUpOnBlochCircle;
