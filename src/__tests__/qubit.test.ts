@@ -118,23 +118,20 @@ describe('qubit', () => {
   });
 
   describe('cnot', () => {
-    it('should invalidate cnot between of a qubit on itself', () => {
+    it('should invalidate cnot of a qubit on itself', () => {
       const aQubit = new Qubit(0);
       expect(() => aQubit.cnot(aQubit)).toThrow(
         'Cnot operation can only be performed on two different qubits.'
       );
     });
 
-    // it('should invalidate cnot between a superimposed qubit and already entagled qubit', () => {
-    //   const aQubit = new Qubit(0).apply(new Hadamard());
-    //   const alreadyEntangledQubit = new Qubit(0)
-    //     .apply(new Hadamard())
-    //     .cnot(new Qubit(1).apply(new Hadamard()));
-
-    //   expect(() => aQubit.cnot(alreadyEntangledQubit)).toThrow(
-    //     'Could not entangle given qubits. Entanglement is essential in performing cnot of a superimposed qubit.'
-    //   );
-    // });
+    it('should invalidate cnot between a superimposed qubit and a non superimposed qubit', () => {
+      const aQubit = new Qubit(0);
+      const bQubit = new Qubit(1).apply(new Hadamard());
+      expect(() => aQubit.cnot(bQubit)).toThrow(
+        'Cannot perform cnot. Results in entanglement.'
+      );
+    });
 
     it('should not invert a qubit when control qubit is 0 for absolute qubits', () => {
       expect(new Qubit(0).cnot(new Qubit(0)).measure()).toBe(0);

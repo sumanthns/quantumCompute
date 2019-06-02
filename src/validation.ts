@@ -1,18 +1,29 @@
+import { isEqual } from 'lodash';
 import Qubit from './qubit';
+import { ZERO_STATE, ONE_STATE } from './constants';
 
-export const validateCnotOperation = (qubit: Qubit, anotherQubit: Qubit) => {
+export const validateOperationOnItself = (
+  qubit: Qubit,
+  anotherQubit: Qubit
+) => {
   if (qubit === anotherQubit) {
     throw new Error(
       'Cnot operation can only be performed on two different qubits.'
     );
   }
+};
 
-  if (
-    qubit.isSuperimposed() &&
-    !(qubit.canEntangle() && anotherQubit.canEntangle())
-  ) {
-    throw new Error(
-      'Could not entangle given qubits. Entanglement is essential in performing cnot of a superimposed qubit.'
-    );
+const isSuperimposed = (internalState: number[]) => {
+  return !(
+    isEqual(internalState, ZERO_STATE) || isEqual(internalState, ONE_STATE)
+  );
+};
+
+export const validateForEntanglement = (
+  inputState: number[],
+  controlState: number[]
+) => {
+  if (isSuperimposed(inputState) !== isSuperimposed(controlState)) {
+    throw new Error('Cannot perform cnot. Results in entanglement.');
   }
 };
