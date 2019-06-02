@@ -7,12 +7,7 @@ import EntangledQubit from './entangledQubit';
 
 class InternalStateVisitor {
   private internalState?: number[];
-  public visit(qubit: Qubit) {
-    qubit.acceptInternalStateVisitor(this);
-    return this;
-  }
-
-  public setInternalState(internalState: number[]) {
+  public visit(internalState: number[]) {
     this.internalState = internalState;
   }
 
@@ -49,7 +44,8 @@ export default class Qubit {
   }
 
   public acceptInternalStateVisitor(visitor: InternalStateVisitor) {
-    visitor.setInternalState(this.internalState);
+    visitor.visit(this.internalState);
+    return visitor;
   }
 
   public cnot(anotherQubit: Qubit) {
@@ -64,8 +60,8 @@ export default class Qubit {
           this.invertState();
         }
       } else {
-        const controlState = new InternalStateVisitor()
-          .visit(anotherQubit)
+        const controlState = anotherQubit
+          .acceptInternalStateVisitor(new InternalStateVisitor())
           .getInternalState();
         if (
           isEqual(controlState, [0, 1]) ||
@@ -78,14 +74,14 @@ export default class Qubit {
     }
   }
 
-  public isEntangled(anotherQubit: Qubit) {
+  public isEntangledWith(anotherQubit: Qubit) {
     return this.entagledQubit === anotherQubit;
   }
 
   public establishMutualEntanglement(anotherQubit: Qubit) {
     if (
       this.canEntangle() &&
-      anotherQubit.isEntangled(this) &&
+      anotherQubit.isEntangledWith(this) &&
       typeof this.entagledQubit === 'undefined'
     ) {
       this.entagledQubit = anotherQubit;
