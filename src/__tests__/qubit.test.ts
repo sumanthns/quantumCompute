@@ -117,7 +117,7 @@ describe('qubit', () => {
     });
   });
 
-  describe.only('cnot', () => {
+  describe('cnot', () => {
     it('should invalidate cnot between a superimposed qubit and an absolute qubit', () => {
       const aQubit = new Qubit(0);
       const bQubit = new Qubit(1).apply(new Hadamard());

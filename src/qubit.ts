@@ -82,9 +82,9 @@ export default class Qubit {
   public measure() {
     let finalValue;
     this.measured = true;
-    if (this.internalState[0] === 1) {
+    if (isEqual(this.internalState, [1, 0])) {
       finalValue = 0;
-    } else if (this.internalState[0] === 0) {
+    } else if (isEqual(this.internalState, [0, 1])) {
       finalValue = 1;
     } else {
       const zeroProbability = Math.pow(this.internalState[0], 2);
