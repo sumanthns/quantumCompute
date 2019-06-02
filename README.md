@@ -70,7 +70,11 @@ In matrix notation, a cnot on two qubits `[a0, b0]` and `[a1, b1]` is denoted as
 
 This is also akin to the inversion of input qubit when the control qubit is one.
 
-This framework only allows cnot to be performed between two non entangled qubits.
+Notes:
+
+1. This framework only allows cnot to be performed between two non entangled qubits.
+
+2. Also, cnot on a superimposed qubit and a non-superimposed qubit results in entanglement. Currently, this framework does not support entanglement.
 
 Eg:
 
