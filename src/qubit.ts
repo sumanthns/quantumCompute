@@ -3,6 +3,23 @@ import BaseGate from './gates/baseGate';
 import lookUpOnBlochCircle from './gates/blochCircle';
 import { validateCnotOperation } from './validation';
 import Not from './gates/not';
+import EntangledQubit from './entangledQubit';
+
+class InternalStateVisitor {
+  private internalState?: number[];
+  public visit(qubit: Qubit) {
+    qubit.acceptInternalStateVisitor(this);
+    return this;
+  }
+
+  public setInternalState(internalState: number[]) {
+    this.internalState = internalState;
+  }
+
+  public getInternalState(): number[] | undefined {
+    return this.internalState;
+  }
+}
 
 export default class Qubit {
   private internalState: number[];
@@ -31,23 +48,34 @@ export default class Qubit {
     return this;
   }
 
+  public acceptInternalStateVisitor(visitor: InternalStateVisitor) {
+    visitor.setInternalState(this.internalState);
+  }
+
   public cnot(anotherQubit: Qubit) {
     validateCnotOperation(this, anotherQubit);
-    if (!anotherQubit.isSuperimposed()) {
-      const controlValue = anotherQubit.measure();
-      if (controlValue === 1) {
-        this.invertState();
-      }
+    if (this.isSuperimposed() !== anotherQubit.isSuperimposed()) {
+      // return new EntangledQubit(this, anotherQubit);
+      return this;
     } else {
-      const controlState = this.entangle(anotherQubit);
-      if (
-        isEqual(controlState, [0, 1]) ||
-        isEqual(controlState, [Math.sqrt(0.5), -Math.sqrt(0.5)])
-      ) {
-        this.invertState();
+      if (!anotherQubit.isSuperimposed()) {
+        const controlValue = anotherQubit.measure();
+        if (controlValue === 1) {
+          this.invertState();
+        }
+      } else {
+        const controlState = new InternalStateVisitor()
+          .visit(anotherQubit)
+          .getInternalState();
+        if (
+          isEqual(controlState, [0, 1]) ||
+          isEqual(controlState, [Math.sqrt(0.5), -Math.sqrt(0.5)])
+        ) {
+          this.invertState();
+        }
       }
+      return this;
     }
-    return this;
   }
 
   public isEntangled(anotherQubit: Qubit) {
