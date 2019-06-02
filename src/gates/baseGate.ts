@@ -1,17 +1,13 @@
 import Qubit from '../qubit';
 
 export default abstract class BaseGate {
-  private state: number[][];
+  private type: string;
 
-  constructor(state: number[][]) {
-    this.state = state;
+  public constructor(type: string) {
+    this.type = type;
   }
 
-  public act(qubit: Qubit) {
-    qubit.apply(this);
-  }
-
-  public getState() {
-    return this.state;
+  public getType() {
+    return this.type;
   }
 }

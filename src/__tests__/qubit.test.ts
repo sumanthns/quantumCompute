@@ -22,7 +22,7 @@ describe('qubit', () => {
   describe('apply hadamard', () => {
     it('should show 50% chance measuring to 0 or 1 on applying a 50% hadamard gate for a 0 qubit initial', () => {
       const qubit = new Qubit(0);
-      const hadamardFiftyPC = new Hadamard(0.5);
+      const hadamardFiftyPC = new Hadamard();
 
       qubit.apply(hadamardFiftyPC);
 
@@ -39,48 +39,10 @@ describe('qubit', () => {
       expect(ones.length).toBe(5);
     });
 
-    it('should show 75% chance measuring to 0 and 25% chance measuring to 1 on applying a 75% hadamard gate for a 0 qubit initial', () => {
-      const qubit = new Qubit(0);
-      const hadamard75PC = new Hadamard(0.75);
-
-      qubit.apply(hadamard75PC);
-
-      let count = 0;
-      const results = [];
-      while (count < 12) {
-        results.push(qubit.show());
-        count += 1;
-      }
-      const zeroes = results.filter(r => r === 0);
-      const ones = results.filter(r => r === 1);
-
-      expect(zeroes.length).toBe(9);
-      expect(ones.length).toBe(3);
-    });
-
-    it('should show 25% chance measuring to 0 and 75% chance measuring to 1 on applying a 25% hadamard gate for a 0 qubit initial', () => {
-      const qubit = new Qubit(0);
-      const hadamard25PC = new Hadamard(0.25);
-
-      qubit.apply(hadamard25PC);
-
-      let count = 0;
-      const results = [];
-      while (count < 12) {
-        results.push(qubit.show());
-        count += 1;
-      }
-      const zeroes = results.filter(r => r === 0);
-      const ones = results.filter(r => r === 1);
-
-      expect(zeroes.length).toBe(3);
-      expect(ones.length).toBe(9);
-    });
-
     [0, 1].forEach(initialState =>
       it(`should be reversed to its ${initialState} state on applying 50% hadamard gate twice`, () => {
         const qubit = new Qubit(initialState);
-        const hadamard = new Hadamard(0.5);
+        const hadamard = new Hadamard();
 
         qubit.apply(hadamard).apply(hadamard);
 
