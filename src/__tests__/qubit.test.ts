@@ -118,14 +118,6 @@ describe('qubit', () => {
   });
 
   describe('cnot', () => {
-    it('should invalidate cnot between a superimposed qubit and an absolute qubit', () => {
-      const aQubit = new Qubit(0);
-      const bQubit = new Qubit(1).apply(new Hadamard());
-      expect(() => bQubit.cnot(aQubit)).toThrow(
-        'Cnot operation can only be performed between two superimposed qubits or two absolute qubits.'
-      );
-    });
-
     it('should invalidate cnot between of a qubit on itself', () => {
       const aQubit = new Qubit(0);
       expect(() => aQubit.cnot(aQubit)).toThrow(

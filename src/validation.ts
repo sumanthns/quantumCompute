@@ -6,11 +6,6 @@ export const validateCnotOperation = (qubit: Qubit, anotherQubit: Qubit) => {
       'Cnot operation can only be performed on two different qubits.'
     );
   }
-  if (qubit.isSuperimposed() !== anotherQubit.isSuperimposed()) {
-    throw new Error(
-      'Cnot operation can only be performed between two superimposed qubits or two absolute qubits.'
-    );
-  }
 
   if (
     qubit.isSuperimposed() &&
