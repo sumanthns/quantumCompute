@@ -74,7 +74,7 @@ describe('qubit', () => {
       expect(new Qubit(1).apply(notGate).measure()).toEqual(0);
     });
 
-    it('should negate the current state of superimposed qubit started with 0', () => {
+    it(' 0 => hadamard => not => hadamard should be 0', () => {
       const notGate = new Not();
       const qubit = new Qubit(0);
       const hadamard = new Hadamard();
@@ -91,11 +91,11 @@ describe('qubit', () => {
 
       const zeroes = results.filter(r => r === 0);
       const ones = results.filter(r => r === 1);
-      expect(zeroes.length).toEqual(0);
-      expect(ones.length).toEqual(10);
+      expect(zeroes.length).toEqual(10);
+      expect(ones.length).toEqual(0);
     });
 
-    it('should negate the current state of superimposed qubit started with 1', () => {
+    it('1 => hadamard => not => hadamard should be 1', () => {
       const notGate = new Not();
       const qubit = new Qubit(1);
       const hadamard = new Hadamard();
@@ -112,8 +112,8 @@ describe('qubit', () => {
 
       const zeroes = results.filter(r => r === 0);
       const ones = results.filter(r => r === 1);
-      expect(zeroes.length).toEqual(10);
-      expect(ones.length).toEqual(0);
+      expect(zeroes.length).toEqual(0);
+      expect(ones.length).toEqual(10);
     });
   });
 
@@ -125,58 +125,68 @@ describe('qubit', () => {
       );
     });
 
-    it('should invalidate cnot between a superimposed qubit and a non superimposed qubit', () => {
-      const aQubit = new Qubit(0);
-      const bQubit = new Qubit(1).apply(new Hadamard());
-      expect(() => aQubit.cnot(bQubit)).toThrow(
-        'Cannot perform cnot. Results in entanglement.'
-      );
+    it('should invert applied qubit when original qubit is absolute 1', () => {
+      const qubit = new Qubit(1);
+      const appliedQubit = new Qubit(0);
+      const anotherAppliedQubit = new Qubit(1);
+      qubit.cnot(appliedQubit);
+      qubit.cnot(anotherAppliedQubit);
+
+      // should invert appliedQubit and anotherAppliedQubit
+      expect(appliedQubit.measure()).toBe(1);
+      expect(anotherAppliedQubit.measure()).toBe(0);
     });
 
-    it('should not invert a qubit when control qubit is 0 for absolute qubits', () => {
-      expect(new Qubit(0).cnot(new Qubit(0)).measure()).toBe(0);
-      expect(new Qubit(1).cnot(new Qubit(0)).measure()).toBe(1);
+    it('should not invert applied qubit when original qubit is absolute 1', () => {
+      const qubit = new Qubit(0);
+      const appliedQubit = new Qubit(0);
+      const anotherAppliedQubit = new Qubit(1);
+      qubit.cnot(appliedQubit);
+      qubit.cnot(anotherAppliedQubit);
+
+      // should not invert appliedQubit and anotherAppliedQubit
+      expect(appliedQubit.measure()).toBe(0);
+      expect(anotherAppliedQubit.measure()).toBe(1);
     });
 
-    it('should invert a qubit when control qubit is 1 for absolute qubits', () => {
-      expect(new Qubit(0).cnot(new Qubit(1)).measure()).toBe(1);
-      expect(new Qubit(1).cnot(new Qubit(1)).measure()).toBe(0);
+    it('should invert a original superimposed 0 qubit when superimposed 1 is applied', () => {
+      const originalQubit = new Qubit(0).apply(new Hadamard());
+      const appliedQubit = new Qubit(1).apply(new Hadamard());
+      originalQubit.cnot(appliedQubit);
+
+      // should invert originalQubit
+      expect(originalQubit.apply(new Hadamard()).measure()).toBe(1);
+      expect(appliedQubit.apply(new Hadamard()).measure()).toBe(1);
     });
 
-    it('should not invert a qubit when control qubit is 0 for superimposed qubits', () => {
-      const aSuperImposedQubit = new Qubit(0).apply(new Hadamard());
-      const bSuperImposedQubit = new Qubit(0).apply(new Hadamard());
+    it('should invert a original superimposed 1 qubit when superimposed 1 is applied', () => {
+      const originalQubit = new Qubit(1).apply(new Hadamard());
+      const appliedQubit = new Qubit(1).apply(new Hadamard());
+      originalQubit.cnot(appliedQubit);
 
-      const results = [];
-      aSuperImposedQubit.cnot(bSuperImposedQubit).apply(new Hadamard());
-      let counter = 0;
-      while (counter < 10) {
-        results.push(aSuperImposedQubit.measure());
-        counter++;
-      }
-
-      const zeroes = results.filter(r => r === 0);
-      const ones = results.filter(r => r === 1);
-      expect(zeroes.length).toEqual(10);
-      expect(ones.length).toEqual(0);
+      // should invert originalQubit
+      expect(originalQubit.apply(new Hadamard()).measure()).toBe(0);
+      expect(appliedQubit.apply(new Hadamard()).measure()).toBe(1);
     });
 
-    it('should invert a qubit when control qubit is 1 for superimposed qubits', () => {
-      const aSuperImposedQubit = new Qubit(0).apply(new Hadamard());
-      const bSuperImposedQubit = new Qubit(1).apply(new Hadamard());
+    it('should not invert a original superimposed 0 qubit when superimposed 0 is applied', () => {
+      const originalQubit = new Qubit(0).apply(new Hadamard());
+      const appliedQubit = new Qubit(0).apply(new Hadamard());
+      originalQubit.cnot(appliedQubit);
 
-      const results = [];
-      aSuperImposedQubit.cnot(bSuperImposedQubit).apply(new Hadamard());
-      let counter = 0;
-      while (counter < 10) {
-        results.push(aSuperImposedQubit.measure());
-        counter++;
-      }
+      // should not invert originalQubit
+      expect(originalQubit.apply(new Hadamard()).measure()).toBe(0);
+      expect(appliedQubit.apply(new Hadamard()).measure()).toBe(0);
+    });
 
-      const zeroes = results.filter(r => r === 0);
-      const ones = results.filter(r => r === 1);
-      expect(zeroes.length).toEqual(0);
-      expect(ones.length).toEqual(10);
+    it('should not invert a original superimposed 1 qubit when superimposed 0 is applied', () => {
+      const originalQubit = new Qubit(1).apply(new Hadamard());
+      const appliedQubit = new Qubit(0).apply(new Hadamard());
+      originalQubit.cnot(appliedQubit);
+
+      // should not invert originalQubit
+      expect(originalQubit.apply(new Hadamard()).measure()).toBe(1);
+      expect(appliedQubit.apply(new Hadamard()).measure()).toBe(0);
     });
   });
 });

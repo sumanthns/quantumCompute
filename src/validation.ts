@@ -13,7 +13,7 @@ export const validateOperationOnItself = (
   }
 };
 
-const isSuperimposed = (internalState: number[]) => {
+const isSuperposed = (internalState: number[]) => {
   return !(
     isEqual(internalState, ZERO_STATE) || isEqual(internalState, ONE_STATE)
   );
@@ -23,7 +23,7 @@ export const validateForEntanglement = (
   inputState: number[],
   controlState: number[]
 ) => {
-  if (isSuperimposed(inputState) !== isSuperimposed(controlState)) {
+  if (isSuperposed(inputState) !== isSuperposed(controlState)) {
     throw new Error('Cannot perform cnot. Results in entanglement.');
   }
 };

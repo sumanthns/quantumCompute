@@ -1,12 +1,14 @@
 import { isEqual } from 'lodash';
-import BaseGate from './gates/baseGate';
-import lookUpOnBlochCircle from './gates/blochCircle';
+import { Matrix, matrix, multiply, sqrt } from 'mathjs';
 import {
   validateOperationOnItself,
   validateForEntanglement
 } from './validation';
 import Not from './gates/not';
 import { ONE_STATE, ZERO_STATE } from './constants';
+import { QuantumGate } from './gates/quantumGate';
+import PhaseInverter from './gates/phaseInverter';
+import EntangledQubit from './entangledQubit';
 
 class InternalStateVisitor {
   private internalState?: number[];
@@ -18,6 +20,34 @@ class InternalStateVisitor {
     return this.internalState;
   }
 }
+
+const hadamardMatrix = [
+  [1 / sqrt(2), 1 / sqrt(2)],
+  [1 / sqrt(2), -1 / sqrt(2)]
+];
+
+const round = (num: number, precision = 0) =>
+  Math.round(num * Math.pow(10, precision)) / Math.pow(10, precision);
+
+const isAbsoluteZero = (state: number[]) =>
+  state[0] === 1 && round(Math.pow(state[0], 2)) === 1;
+const isAbsoluteOne = (state: number[]) =>
+  state[0] === 0 && Math.pow(round(state[1]), 2) === 1;
+const isSuperposedOne = (state: number[]) =>
+  isAbsoluteOne(multiply(hadamardMatrix, state) as number[]);
+const isSuperposed = (state: number[]) =>
+  !(isAbsoluteZero(state) && isAbsoluteOne(state));
+const isAbsolute = (state: number[]) =>
+  isAbsoluteZero(state) || isAbsoluteOne(state);
+
+const CNOT_MATRIX = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]];
+
+const tensorProduct = (state: number[], anotherState: number[]) => [
+  state[0] * anotherState[0],
+  state[0] * anotherState[1],
+  state[1] * anotherState[0],
+  state[1] * anotherState[1]
+];
 
 export default class Qubit {
   private internalState: number[];
@@ -34,9 +64,12 @@ export default class Qubit {
     }
   }
 
-  public apply(gate: BaseGate) {
-    const gateType = gate.getType();
-    this.internalState = lookUpOnBlochCircle(this.internalState, gateType);
+  public apply(gate: QuantumGate) {
+    const result = multiply(gate.getModifier(), this.internalState) as number[];
+    if (result.length !== 2) {
+      throw new Error('Only single bit gates can be applied.');
+    }
+    this.internalState = [...result];
     return this;
   }
 
@@ -45,32 +78,44 @@ export default class Qubit {
     return visitor;
   }
 
-  public cnot(anotherQubit: Qubit) {
-    validateOperationOnItself(this, anotherQubit);
-    const controlState = anotherQubit
+  public cnot(thatQubit: Qubit) {
+    validateOperationOnItself(this, thatQubit);
+    const thatInternalState = thatQubit
       .acceptInternalStateVisitor(new InternalStateVisitor())
       .getInternalState()!;
 
-    validateForEntanglement(this.internalState, controlState);
+    validateForEntanglement(this.internalState, thatInternalState);
 
-    if (
-      isEqual(controlState, ONE_STATE) ||
-      isEqual(controlState, [Math.sqrt(0.5), -Math.sqrt(0.5)])
+    if (isAbsolute(this.internalState) && isAbsolute(thatInternalState)) {
+      if (isAbsoluteOne(this.internalState)) {
+        thatQubit.apply(new Not());
+      }
+    } else if (
+      isSuperposed(this.internalState) &&
+      isSuperposed(thatInternalState)
     ) {
-      this.invertState();
+      if (isSuperposedOne(thatInternalState)) {
+        this.apply(new Not())
+          .apply(new PhaseInverter())
+          .apply(new Not());
+      }
+    } else {
+      const qubitProduct = tensorProduct(this.internalState, thatInternalState);
+      const cnotApplied = multiply(CNOT_MATRIX, qubitProduct) as number[];
+      const entanlgedQubit = new EntangledQubit(cnotApplied);
     }
+
     return this;
   }
 
   public measure() {
-    let finalValue;
-    if (isEqual(this.internalState, ZERO_STATE)) {
-      finalValue = 0;
-    } else if (isEqual(this.internalState, ONE_STATE)) {
-      finalValue = 1;
+    const zeroProbability = Math.pow(round(this.internalState[0], 5), 2);
+    let value;
+    if (zeroProbability === 0) {
+      value = 1;
+    } else if (zeroProbability === 1) {
+      value = 0;
     } else {
-      const zeroProbability = Math.pow(this.internalState[0], 2);
-      let value;
       if (this.valueHistory.length === 0) {
         value = zeroProbability > 0.5 ? 0 : 1;
       } else {
@@ -79,10 +124,9 @@ export default class Qubit {
         value =
           numberOfZeroes / this.valueHistory.length <= zeroProbability ? 0 : 1;
       }
-      this.valueHistory.push(value);
-      finalValue = value;
     }
-    return finalValue;
+    this.valueHistory.push(value);
+    return value;
   }
 
   private invertState() {
