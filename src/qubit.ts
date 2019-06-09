@@ -5,6 +5,7 @@ import { QuantumGate } from './gates/quantumGate';
 import PhaseInverter from './gates/phaseInverter';
 import EntangledQubit from './entangledQubit';
 import Hadamard from './gates/hadamard';
+import { shuffle, getRandomInt } from './helper';
 
 class InternalStateVisitor {
   private internalState?: number[];
@@ -135,23 +136,30 @@ export default class Qubit {
     ) {
       this.entangledQubit.measure();
     }
-    const zeroProbability = Math.pow(round(this.internalState[0], 5), 2);
-    let value;
-    if (zeroProbability === 0) {
-      value = 1;
-    } else if (zeroProbability === 1) {
-      value = 0;
-    } else {
-      if (this.valueHistory.length === 0) {
-        value = zeroProbability > 0.5 ? 0 : 1;
-      } else {
-        const numberOfZeroes = this.valueHistory.filter(val => val === 0)
-          .length;
-        value =
-          numberOfZeroes / this.valueHistory.length <= zeroProbability ? 0 : 1;
-      }
+    if (isAbsoluteZero(this.internalState)) {
+      return 0;
     }
-    this.valueHistory.push(value);
+    if (isAbsoluteOne(this.internalState)) {
+      return 1;
+    }
+    const zeroProbability = Math.pow(round(this.internalState[0], 5), 2);
+    const oneProbaility = 1 - zeroProbability;
+    const probabilityArray = [];
+    for (let i = 0; i < zeroProbability * 100; i++) {
+      probabilityArray.push(0);
+    }
+
+    for (let i = 0; i < oneProbaility * 100; i++) {
+      probabilityArray.push(1);
+    }
+
+    shuffle(probabilityArray);
+    const value = probabilityArray[getRandomInt(99)];
+    if (value === 0) {
+      this.internalState = [1, 0];
+    } else if (value === 1) {
+      this.internalState = [0, 1];
+    }
     return value;
   }
 }

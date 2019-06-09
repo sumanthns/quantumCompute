@@ -1,13 +1,10 @@
 import Qubit from './qubit';
+import { shuffle, getRandomInt } from './helper';
 
 const ZERO_ZERO = 1;
 const ONE_ZERO = 2;
 const ZERO_ONE = 3;
 const ONE_ONE = 4;
-
-function shuffle(array: number[]) {
-  array.sort(() => Math.random() - 0.5);
-}
 
 export default class EntangledQubit {
   private internalState: number[];
@@ -44,7 +41,7 @@ export default class EntangledQubit {
       probabilityArray.push(ONE_ONE);
     }
     shuffle(probabilityArray);
-    const randomValue = probabilityArray[probabilityArray.length - 1];
+    const randomValue = probabilityArray[getRandomInt(99)];
 
     switch (randomValue) {
       case ZERO_ZERO: {

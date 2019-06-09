@@ -22,34 +22,32 @@ describe('qubit', () => {
 
   describe('apply hadamard', () => {
     it('should show 50% chance measuring to 0 or 1 on applying a 50% hadamard gate for a 0 qubit initial', () => {
-      const qubit = new Qubit(0);
-      const hadamardFiftyPC = new Hadamard();
-
-      qubit.apply(hadamardFiftyPC);
-
       let count = 0;
       const results = [];
-      while (count < 10) {
+      while (count < 1000) {
+        const qubit = new Qubit(0);
+        const hadamard = new Hadamard();
+
+        qubit.apply(hadamard);
         results.push(qubit.measure());
         count += 1;
       }
       const zeroes = results.filter(r => r === 0);
       const ones = results.filter(r => r === 1);
 
-      expect(zeroes.length).toBe(5);
-      expect(ones.length).toBe(5);
+      // Number of 0s and 1s should be closer within 5% of total number of trials
+      expect(Math.abs(zeroes.length - ones.length)).toBeLessThan(50);
     });
 
     [0, 1].forEach(initialState =>
       it(`should be reversed to its ${initialState} state on applying 50% hadamard gate twice`, () => {
-        const qubit = new Qubit(initialState);
-        const hadamard = new Hadamard();
-
-        qubit.apply(hadamard).apply(hadamard);
-
         let count = 0;
         const results = [];
         while (count < 10) {
+          const qubit = new Qubit(initialState);
+          const hadamard = new Hadamard();
+
+          qubit.apply(hadamard).apply(hadamard);
           results.push(qubit.measure());
           count += 1;
         }
@@ -75,16 +73,16 @@ describe('qubit', () => {
     });
 
     it(' 0 => hadamard => not => hadamard should be 0', () => {
-      const notGate = new Not();
-      const qubit = new Qubit(0);
-      const hadamard = new Hadamard();
-      qubit
-        .apply(hadamard)
-        .apply(notGate)
-        .apply(hadamard);
       const results = [];
       let count = 0;
       while (count < 10) {
+        const qubit = new Qubit(0);
+        const notGate = new Not();
+        const hadamard = new Hadamard();
+        qubit
+          .apply(hadamard)
+          .apply(notGate)
+          .apply(hadamard);
         results.push(qubit.measure());
         count++;
       }
@@ -96,16 +94,16 @@ describe('qubit', () => {
     });
 
     it('1 => hadamard => not => hadamard should be 1', () => {
-      const notGate = new Not();
-      const qubit = new Qubit(1);
-      const hadamard = new Hadamard();
-      qubit
-        .apply(hadamard)
-        .apply(notGate)
-        .apply(hadamard);
       const results = [];
       let count = 0;
       while (count < 10) {
+        const notGate = new Not();
+        const qubit = new Qubit(1);
+        const hadamard = new Hadamard();
+        qubit
+          .apply(hadamard)
+          .apply(notGate)
+          .apply(hadamard);
         results.push(qubit.measure());
         count++;
       }
