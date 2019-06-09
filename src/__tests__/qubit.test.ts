@@ -189,4 +189,62 @@ describe('qubit', () => {
       expect(appliedQubit.apply(new Hadamard()).measure()).toBe(0);
     });
   });
+
+  describe('entanglement', () => {
+    it('should create equal entanglement between a superposed qubit 0 and an absolute qubit 0 on cnot', () => {
+      //expect 50% probability of both qubit being 11 or 00, but not 10 or 01
+      let counter = 0;
+
+      while (counter < 10) {
+        const qubitOne = new Qubit(0);
+        const qubitTwo = new Qubit(0);
+
+        qubitOne.apply(new Hadamard()).cnot(qubitTwo);
+        expect(qubitOne.measure()).toBe(qubitTwo.measure());
+        counter++;
+      }
+    });
+
+    it('should create equal entanglement between a superposed qubit 1 and an absolute qubit 0 on cnot', () => {
+      //expect 50% probability of both qubit being 11 or 00, but not 10 or 01
+      let counter = 0;
+
+      while (counter < 10) {
+        const qubitOne = new Qubit(1);
+        const qubitTwo = new Qubit(0);
+
+        qubitOne.apply(new Hadamard()).cnot(qubitTwo);
+        expect(qubitOne.measure()).toBe(qubitTwo.measure());
+        counter++;
+      }
+    });
+
+    it('should create opposite entanglement between a superposed qubit 0 and an absolute qubit 1 on cnot', () => {
+      //expect 50% probability of both qubit being 10 or 01, but not 00 or 11
+      let counter = 0;
+
+      while (counter < 10) {
+        const qubitOne = new Qubit(0);
+        const qubitTwo = new Qubit(1);
+
+        qubitOne.apply(new Hadamard()).cnot(qubitTwo);
+        expect(qubitOne.measure()).not.toBe(qubitTwo.measure());
+        counter++;
+      }
+    });
+
+    it('should create opposite entanglement between a superposed qubit 1 and an absolute qubit 1 on cnot', () => {
+      //expect 50% probability of both qubit being 10 or 01, but not 00 or 11
+      let counter = 0;
+
+      while (counter < 10) {
+        const qubitOne = new Qubit(1);
+        const qubitTwo = new Qubit(1);
+
+        qubitOne.apply(new Hadamard()).cnot(qubitTwo);
+        expect(qubitOne.measure()).not.toBe(qubitTwo.measure());
+        counter++;
+      }
+    });
+  });
 });

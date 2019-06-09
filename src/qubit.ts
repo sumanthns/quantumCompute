@@ -1,14 +1,10 @@
-import { isEqual } from 'lodash';
-import { Matrix, matrix, multiply, sqrt } from 'mathjs';
-import {
-  validateOperationOnItself,
-  validateForEntanglement
-} from './validation';
+import { multiply, sqrt } from 'mathjs';
+import { validateOperationOnItself } from './validation';
 import Not from './gates/not';
-import { ONE_STATE, ZERO_STATE } from './constants';
 import { QuantumGate } from './gates/quantumGate';
 import PhaseInverter from './gates/phaseInverter';
 import EntangledQubit from './entangledQubit';
+import Hadamard from './gates/hadamard';
 
 class InternalStateVisitor {
   private internalState?: number[];
@@ -36,7 +32,7 @@ const isAbsoluteOne = (state: number[]) =>
 const isSuperposedOne = (state: number[]) =>
   isAbsoluteOne(multiply(hadamardMatrix, state) as number[]);
 const isSuperposed = (state: number[]) =>
-  !(isAbsoluteZero(state) && isAbsoluteOne(state));
+  !(isAbsoluteZero(state) || isAbsoluteOne(state));
 const isAbsolute = (state: number[]) =>
   isAbsoluteZero(state) || isAbsoluteOne(state);
 
@@ -51,7 +47,9 @@ const tensorProduct = (state: number[], anotherState: number[]) => [
 
 export default class Qubit {
   private internalState: number[];
+  private entangledQubit?: EntangledQubit;
   private valueHistory: number[] = [];
+
   constructor(type: number) {
     if (type === 0) {
       this.internalState = [1, 0];
@@ -84,8 +82,6 @@ export default class Qubit {
       .acceptInternalStateVisitor(new InternalStateVisitor())
       .getInternalState()!;
 
-    validateForEntanglement(this.internalState, thatInternalState);
-
     if (isAbsolute(this.internalState) && isAbsolute(thatInternalState)) {
       if (isAbsoluteOne(this.internalState)) {
         thatQubit.apply(new Not());
@@ -99,16 +95,46 @@ export default class Qubit {
           .apply(new PhaseInverter())
           .apply(new Not());
       }
-    } else {
+    } else if (
+      isSuperposed(this.internalState) &&
+      isAbsolute(thatInternalState)
+    ) {
+      // Entanglement
       const qubitProduct = tensorProduct(this.internalState, thatInternalState);
-      const cnotApplied = multiply(CNOT_MATRIX, qubitProduct) as number[];
-      const entanlgedQubit = new EntangledQubit(cnotApplied);
+      const cnotAppliedState = multiply(CNOT_MATRIX, qubitProduct) as number[];
+      const entangledQubit = new EntangledQubit(cnotAppliedState);
+      entangledQubit.register(this.internalState);
+      if (typeof this.entangledQubit === 'undefined') {
+        this.entangledQubit = entangledQubit;
+        thatQubit.entangle(entangledQubit, this);
+      }
     }
 
     return this;
   }
 
+  public isEntangledTo(entangledQubit: EntangledQubit) {
+    return this.entangledQubit === entangledQubit;
+  }
+
+  public entangle(entangledQubit: EntangledQubit, pair: Qubit) {
+    if (
+      typeof this.entangledQubit === 'undefined' &&
+      pair.isEntangledTo(entangledQubit)
+    ) {
+      this.entangledQubit = entangledQubit;
+      this.apply(new Hadamard());
+      entangledQubit.register(this.internalState);
+    }
+  }
+
   public measure() {
+    if (
+      typeof this.entangledQubit !== 'undefined' &&
+      isSuperposed(this.internalState)
+    ) {
+      this.entangledQubit.measure();
+    }
     const zeroProbability = Math.pow(round(this.internalState[0], 5), 2);
     let value;
     if (zeroProbability === 0) {
@@ -127,9 +153,5 @@ export default class Qubit {
     }
     this.valueHistory.push(value);
     return value;
-  }
-
-  private invertState() {
-    this.apply(new Not());
   }
 }
