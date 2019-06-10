@@ -29,6 +29,15 @@ A qubit can be passed through multiple [logic gates](https://en.wikipedia.org/wi
 
 A not gate inverts the state of a qubit.
 
+```
+const qubit = new Qubit(0);
+qubit.appy(new Not());
+qubit.measure(); // This will result 1
+
+qubit.apply(new Not());
+qubit.measure(); // This will result 0 again
+```
+
 ### Hadamard gate
 
 A [hadamard](https://en.wikipedia.org/wiki/Quantum_logic_gate#Hadamard_(H)_gate) gate puts a qubit into superimposition. A hadamard gate is also reversible. Applying a hadamard gate on an already superimposed qubit will give back the original state of the qubit before superimposition.
@@ -53,6 +62,37 @@ again to get the initial 1 state:
 [[1/√2, 1/√2], [1/√2, -1/√2]] * [0, 1] = [1/√2, -1/√2]
 [[1/√2, 1/√2], [1/√2, -1/√2]] * [1/√2, -1/√2] = [0, 1]
 
+```
+
+Example
+```
+const qubit1 = new Qubit(0);
+qubit1.appy(new Hadamard());
+qubit1.measure(); // 50/50 chance either 0 or 1
+
+const qubit2 = new Qubit(1);
+qubit2.appy(new Hadamard());
+qubit2.measure(); // 50/50 chance either 0 or 1
+
+const aQubit = new Qubit(0).apply(new Hadamard()).apply(new Hadamard());
+aQubit.measure() // This will return 0 again
+
+const bQubit = new Qubit(0).apply(new Hadamard()).apply(new Hadamard());
+bQubit.measure() // This will return 1 again
+```
+
+### Z
+
+[Pauli's Z gate](https://en.wikipedia.org/wiki/Pauli_matrices) shifts the phase of a qubit by pi radians along z-axis.
+
+It is equivalent to multiplying this 2*2 matrix to qubit state [[1, 0], [0, -1]]
+
+```
+const qubit = new Qubit(0)
+qubit.apply(new Hadamard()); // puts to a superposition [1/√2, 1/√2]
+qubit.apply(new Z()); // shifts by pi across z-axiz [1/√2, -1/√2]
+qubit.apply(new Hadamard()); // takes it back from superposition to [0, 1]
+qubit.measure() // this will always return 1
 ```
 
 ### Cnot
