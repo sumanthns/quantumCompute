@@ -74,7 +74,7 @@ Notes:
 
 1. This framework only allows cnot to be performed between two non entangled qubits.
 
-2. Also, cnot on a superimposed qubit and a non-superimposed qubit results in entanglement. Currently, this framework does not support entanglement.
+2. Also, cnot on a superimposed qubit and a non-superimposed qubit results in entanglement. See #Entanglement section for more details.
 
 Eg:
 
@@ -108,3 +108,52 @@ Cnot([1/√2, 1/√2], [1/√2, -1/√2]) = [1/√2, -1/√2], [1/√2, -1/√2]
 Cnot([1/√2, -1/√2], [1/√2, -1/√2]) = [1/√2, 1/√2], [1/√2, -1/√2]
 ```
 
+## Entanglement
+
+Two qubits are said to be in [entanglement](https://en.wikipedia.org/wiki/Quantum_entanglement), if the qubits state are not independent. The effects of entanglement are non-local and can also take place across huge spatial distance.
+
+Qubits entanglement can be achieved by applying CNOT on a superposed qubit and an absolute qubit.
+
+```
+const superPosedQubit = new Qubit(0).apply(new Hadamard());
+const absoluteQubit = new Qubit(0);
+
+superPosedQubit.cnot(absoluteQubit)
+
+This effects to CNOT(superPosed ⍟ absoluteQubit)
+
+= CNOT([1/√2, 1/√2] ⍟ [1, 0])
+= CNOT([1/√2, 0, 1/√2, 0])
+= ([1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]) * ([1/√2, 0, 1/√2, 0])
+= [1/√2, 0, 0, 1/√2]
+
+If we have to apply tensor product to two qubit states to get the above value
+= [a, b] ⍟ [c, d]
+Then,
+ac = 1/√2
+ad = 0
+bc = 0
+bd =  1/√2
+
+If a = 0, then ac != 1/√2
+If d = 0, then bd != 1/√2
+
+Hence, we can see that there are no two qubit states that can independently achieve the resulting 4 state vector [1/√2, 0, 0, 1/√2]. Hence, mathematically superPosedQubit and absoluteQubit are in entanglement.
+
+In this example, there is 50 % probaility of both qubits to be in |00> or |11> but 0% probability to be in |01> or |10>
+
+we can also achieve [0, 1/√2, 1/√2, 0] where there is 50 % probaility of both qubits to be in |10> or |01>  but 0% probability to be in |00> or |11>
+by appliying CNOT on superposed qubit and abosulte qubit in state |1>, i.e, new Qubit(0).apply(new Hadamard()).cnot(new Qubit(1))
+```
+
+When two qubits are in entaglement, measuring one qubit will also collapse the other qubit to a state according to its probability.
+
+```
+In the above example of entangled qubits, entangled at [1/√2, 0, 0, 1/√2],
+measuring superposedQubit or absoluteQubit will also collapse other qubit to the same value.
+
+If superPosedQubit.measure() === 0 then absoluteQubit.measure() === 0
+If superPosedQubit.measure() === 1 then absoluteQubit.measure() === 1
+
+Hence, superPosedQubit.measure() === absoluteQubit.measure() is true no matter how many times you repeat the experiment.
+```
