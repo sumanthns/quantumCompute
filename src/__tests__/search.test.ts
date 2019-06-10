@@ -1,6 +1,5 @@
 import Qubit from '../qubit';
 import Hadamard from '../gates/hadamard';
-import Not from '../gates/not';
 import GroverDiffusion from '../gates/groverDiffusion';
 
 describe('Grovers search', () => {

@@ -13,9 +13,15 @@
   "devDependencies": {
     "@types/jest": "^24.0.13",
     "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-import": "^2.17.3",
+    "eslint-plugin-prettier": "^3.1.0",
     "jest": "^24.8.0",
+    "prettier": "^1.18.2",
     "tslint": "^5.16.0",
     "typescript": "^3.4.5",
+    "typescript-eslint-parser": "^22.0.0",
     "webpack": "^4.32.2",
     "webpack-cli": "^3.3.2"
   },
