@@ -157,3 +157,11 @@ If superPosedQubit.measure() === 1 then absoluteQubit.measure() === 1
 
 Hence, superPosedQubit.measure() === absoluteQubit.measure() is true no matter how many times you repeat the experiment.
 ```
+
+#Contributing
+
+Pull requests for new features, bug fixes, and suggestions are welcome!
+
+#License
+
+[MIT](https://en.wikipedia.org/wiki/MIT_License)
