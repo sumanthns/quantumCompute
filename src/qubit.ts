@@ -1,11 +1,11 @@
 import { multiply, sqrt } from 'mathjs';
 import { validateOperationOnItself } from './validation';
 import Not from './gates/not';
-import { QuantumGate } from './gates/quantumGate';
-import PhaseInverter from './gates/phaseInverter';
+import { IQuantumGate } from './types/quantumGate';
 import EntangledQubit from './entangledQubit';
-import Hadamard from './gates/hadamard';
 import { shuffle, getRandomInt } from './helper';
+import Z from './gates/z';
+import { IQubit } from './types/qubit';
 
 class InternalStateVisitor {
   private internalState?: number[];
@@ -27,9 +27,9 @@ const round = (num: number, precision = 0) =>
   Math.round(num * Math.pow(10, precision)) / Math.pow(10, precision);
 
 const isAbsoluteZero = (state: number[]) =>
-  state[0] === 1 && round(Math.pow(state[0], 2)) === 1;
+  Math.pow(round(state[0]), 2) === 1 && round(Math.pow(state[0], 2)) === 1;
 const isAbsoluteOne = (state: number[]) =>
-  state[0] === 0 && Math.pow(round(state[1]), 2) === 1;
+  Math.pow(round(state[0]), 2) === 0 && Math.pow(round(state[1]), 2) === 1;
 const isSuperposedOne = (state: number[]) =>
   isAbsoluteOne(multiply(hadamardMatrix, state) as number[]);
 const isSuperposed = (state: number[]) =>
@@ -46,10 +46,9 @@ const tensorProduct = (state: number[], anotherState: number[]) => [
   state[1] * anotherState[1]
 ];
 
-export default class Qubit {
+export default class Qubit implements IQubit {
   private internalState: number[];
   private entangledQubit?: EntangledQubit;
-  private valueHistory: number[] = [];
 
   constructor(type: number) {
     if (type === 0) {
@@ -63,7 +62,10 @@ export default class Qubit {
     }
   }
 
-  public apply(gate: QuantumGate) {
+  public apply(gate: IQuantumGate) {
+    if (typeof this.entangledQubit !== 'undefined') {
+      return this.entangledQubit.apply(gate);
+    }
     const result = multiply(gate.getModifier(), this.internalState) as number[];
     if (result.length !== 2) {
       throw new Error('Only single bit gates can be applied.');
@@ -77,9 +79,9 @@ export default class Qubit {
     return visitor;
   }
 
-  public cnot(thatQubit: Qubit) {
+  public cnot(thatQubit: IQubit) {
     validateOperationOnItself(this, thatQubit);
-    const thatInternalState = thatQubit
+    const thatInternalState = (thatQubit as Qubit)
       .acceptInternalStateVisitor(new InternalStateVisitor())
       .getInternalState()!;
 
@@ -92,9 +94,7 @@ export default class Qubit {
       isSuperposed(thatInternalState)
     ) {
       if (isSuperposedOne(thatInternalState)) {
-        this.apply(new Not())
-          .apply(new PhaseInverter())
-          .apply(new Not());
+        this.apply(new Z());
       }
     } else if (
       isSuperposed(this.internalState) &&
@@ -107,7 +107,7 @@ export default class Qubit {
       entangledQubit.register(this.internalState);
       if (typeof this.entangledQubit === 'undefined') {
         this.entangledQubit = entangledQubit;
-        thatQubit.entangle(entangledQubit, this);
+        (thatQubit as Qubit).entangle(entangledQubit, this);
       }
     }
 
@@ -124,7 +124,7 @@ export default class Qubit {
       pair.isEntangledTo(entangledQubit)
     ) {
       this.entangledQubit = entangledQubit;
-      this.apply(new Hadamard());
+      // this.apply(new Hadamard());
       entangledQubit.register(this.internalState);
     }
   }
@@ -136,6 +136,7 @@ export default class Qubit {
     ) {
       this.entangledQubit.measure();
     }
+    this.entangledQubit = undefined;
     if (isAbsoluteZero(this.internalState)) {
       return 0;
     }

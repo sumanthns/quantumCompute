@@ -1,12 +1,14 @@
-import Qubit from './qubit';
+import { multiply } from 'mathjs';
 import { shuffle, getRandomInt } from './helper';
+import { IQuantumGate } from './types/quantumGate';
+import { IQubit } from './types/qubit';
 
 const ZERO_ZERO = 1;
 const ONE_ZERO = 2;
 const ZERO_ONE = 3;
 const ONE_ONE = 4;
 
-export default class EntangledQubit {
+export default class EntangledQubit implements IQubit {
   private internalState: number[];
   private pairedQubitStates: number[][] = [];
   constructor(state: number[]) {
@@ -17,6 +19,19 @@ export default class EntangledQubit {
     if (!this.pairedQubitStates.includes(state)) {
       this.pairedQubitStates.push(state);
     }
+  }
+
+  public cnot(_: IQubit) {
+    return _;
+  }
+
+  public apply(gate: IQuantumGate) {
+    const result = multiply(
+      gate.getTwoBitModifier(),
+      this.internalState
+    ) as number[];
+    this.internalState = [...result];
+    return this;
   }
 
   public measure() {
@@ -76,5 +91,6 @@ export default class EntangledQubit {
         break;
       }
     }
+    return randomValue;
   }
 }

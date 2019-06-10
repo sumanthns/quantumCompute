@@ -1,8 +1,8 @@
-import Qubit from './qubit';
+import { IQubit } from './types/qubit';
 
 export const validateOperationOnItself = (
-  qubit: Qubit,
-  anotherQubit: Qubit
+  qubit: IQubit,
+  anotherQubit: IQubit
 ) => {
   if (qubit === anotherQubit) {
     throw new Error(

@@ -1,15 +1,15 @@
 import { IQuantumGate } from '../types/quantumGate';
 
-export default class Not implements IQuantumGate {
+export default class GroverDiffusion implements IQuantumGate {
   private modifier: number[][];
   private twoBitmodifier: number[][];
   public constructor() {
-    this.modifier = [[0, 1], [1, 0]];
+    this.modifier = [[-1, 1], [1, -1]];
     this.twoBitmodifier = [
-      [0, 0, 0, 1],
-      [0, 0, 1, 0],
-      [0, 1, 0, 0],
-      [1, 0, 0, 0]
+      [-0.5, 0.5, 0.5, 0.5],
+      [0.5, -0.5, 0.5, 0.5],
+      [0.5, 0.5, -0.5, 0.5],
+      [0.5, 0.5, 0.5, -0.5]
     ];
   }
 
