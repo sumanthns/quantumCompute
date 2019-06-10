@@ -1,6 +1,6 @@
 # quantumCompute
 
-Quantum computation simulator
+Quantum computation simulator in Typescript
 
 ## Qubit
 
