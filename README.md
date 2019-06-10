@@ -32,10 +32,10 @@ A not gate inverts the state of a qubit.
 ```
 const qubit = new Qubit(0);
 qubit.appy(new Not());
-qubit.measure(); // This will result 1
+qubit.measure(); // This will return 1 always
 
 qubit.apply(new Not());
-qubit.measure(); // This will result 0 again
+qubit.measure(); // This will return 0 always
 ```
 
 ### Hadamard gate
