@@ -11,6 +11,7 @@ describe('Grovers search', () => {
     qubit2.apply(new Hadamard());
 
     // apply Oracle function for 4th|11> index
+    // This creates an entanglement
     qubit2.apply(new Hadamard());
     qubit1.cnot(qubit2);
     qubit2.apply(new Hadamard());
