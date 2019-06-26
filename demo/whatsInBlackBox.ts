@@ -41,6 +41,7 @@ const randomBlackBox = blackBoxFunctions[randomBlackBoxIndex];
 const q1 = new Qubit(0).apply(new Not()).apply(new Hadamard()) as Qubit;
 const q2 = new Qubit(0).apply(new Not()).apply(new Hadamard()) as Qubit;
 
+// Result will be 0 for constant functions and 1 for variable type functions
 const outputs = randomBlackBox.action(q1, q2);
 console.log(
   `Result`,
