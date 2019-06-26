@@ -26,7 +26,7 @@ const blackBoxFunctions = [
   },
   {
     type: 'variable',
-    name: 'Inverse',
+    name: 'Indentity',
     action: (q1: Qubit, q2: Qubit) => {
       return [q1.cnot(q2).apply(new Not()), q2];
     }
@@ -52,3 +52,5 @@ console.log(
   `BlackBoxType`,
   randomBlackBox.type
 );
+
+console.log('-------------------');
