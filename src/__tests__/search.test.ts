@@ -4,7 +4,7 @@ import GroverDiffusion from '../gates/groverDiffusion';
 import Not from '../gates/not';
 
 describe('Grovers search', () => {
-  it('should output the 1st search key for a given result in ay array of 4 elements in one iteration', () => {
+  it('should output the 1st search key for a given result in an array of 4 elements in one iteration', () => {
     const qubit1 = new Qubit(0);
     const qubit2 = new Qubit(0);
 
@@ -28,7 +28,7 @@ describe('Grovers search', () => {
     expect(qubit2.measure()).toBe(0);
   });
 
-  it('should output the 2nd search key for a given result in ay array of 4 elements in one iteration', () => {
+  it('should output the 2nd search key for a given result in an array of 4 elements in one iteration', () => {
     const qubit1 = new Qubit(0);
     const qubit2 = new Qubit(0);
 
@@ -48,7 +48,7 @@ describe('Grovers search', () => {
     expect(qubit2.measure()).toBe(0);
   });
 
-  it('should output the 3rd search key for a given result in ay array of 4 elements in one iteration', () => {
+  it('should output the 3rd search key for a given result in an array of 4 elements in one iteration', () => {
     const qubit1 = new Qubit(0);
     const qubit2 = new Qubit(0);
 
@@ -72,7 +72,7 @@ describe('Grovers search', () => {
     expect(qubit2.measure()).toBe(1);
   });
 
-  it('should output the 4th search key for a given result in ay array of 4 elements in one iteration', () => {
+  it('should output the 4th search key for a given result in an array of 4 elements in one iteration', () => {
     const qubit1 = new Qubit(0);
     const qubit2 = new Qubit(0);
 
