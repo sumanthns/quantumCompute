@@ -21,7 +21,7 @@ shuffle(knownPasswords);
 let i = 1;
 for (const password of knownPasswords) {
   if (oracle(password) === 1) {
-    console.log(`Found password in ${i} attempts`);
+    console.log(`Password is ${password}, found after ${i} attempts`);
     break;
   }
   i++;
