@@ -3,6 +3,13 @@ import Hadamard from '../src/gates/hadamard';
 import Not from '../src/gates/not';
 import GroverDiffusion from '../src/gates/groverDiffusion';
 
+const lookup: { [key: string]: string } = {
+  '10': 'secret-password',
+  '11': 'password',
+  '00': 'password-secret',
+  '01': 'secret'
+};
+
 const oracle = (qubit1: Qubit, qubit2: Qubit) => {
   // apply Oracle function |10> state
   // This creates an entanglement
@@ -22,13 +29,6 @@ qubit2.apply(new Hadamard());
 
 // apply Grover's diffusion
 qubit1.apply(new GroverDiffusion());
-
-const lookup: { [key: string]: string } = {
-  '10': 'secret-password',
-  '11': 'password',
-  '00': 'password-secret',
-  '01': 'secret'
-};
 
 const lookUpValue = `${qubit1.measure()}${qubit2.measure()}`;
 
