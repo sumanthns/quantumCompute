@@ -1,4 +1,4 @@
-export const shuffle = (array: number[]) => {
+export const shuffle = (array: (number | string)[]) => {
   array.sort(() => Math.random() - 0.5);
 };
 
