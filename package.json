@@ -43,7 +43,7 @@
     "@types/lodash": "^4.14.132",
     "@types/mathjs": "^5.0.1",
     "lodash": "^4.17.11",
-    "mathjs": "^5.10.3",
+    "mathjs": "^7.5.1",
     "object-hash": "^1.3.1",
     "ts-jest": "^24.0.2"
   }
